@@ -100,6 +100,7 @@ MakeTlsCert
 MakeDkimCert
 WriteEnv
 WriteScript
+WriteTestScripts
 clear
 ShowLogo
 ShowNextSteps
@@ -559,7 +560,107 @@ openssl rsa -in $dkimPrivateFull -out $dkimPublicFull -pubout -outform PEM
 }
 
 
+WriteTestScripts(){
+    testScript1=/var/virtru/vg/test/checkendpoints.sh
+/bin/cat <<EOM >$testScript1
+#!/bin/bash
 
+echo https://google.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://google.com
+echo ""
+
+echo https://acm.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://acm.virtru.com
+echo ""
+
+echo https://events.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://events.virtru.com
+echo ""
+
+echo https://accounts.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://accounts.virtru.com
+echo ""
+
+echo https://secure.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://secure.virtru.com
+echo ""
+
+echo https://storage.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://storage.virtru.com
+echo ""
+
+echo https://encrypted-storage.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://encrypted-storage.virtru.com
+echo ""
+
+echo https://api.amplitude.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://api.amplitude.com
+echo ""
+
+echo https://cdn.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://cdn.virtru.com
+echo ""
+
+echo https://repo.maven.apache.org
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://repo.maven.apache.org
+echo ""
+
+echo https://hub.docker.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://hub.docker.com
+echo ""
+
+
+
+EOM
+
+
+ testScript2=/var/virtru/vg/test/runall.sh
+/bin/cat <<EOM >$testScript2
+#!/bin/bash
+
+for container in \`docker ps -q\`; do
+  # show the name of the container
+  docker inspect --format='{{.Name}}' \$container;
+  # run the command (date in the case)
+  docker exec -it \$container \$1
+done
+
+
+EOM
+
+
+ testScript3=/var/virtru/vg/test/sendtestmessage.sh
+/bin/cat <<EOM >$testScript3
+#!/bin/bash
+
+echo "Update Virtru Gateway ENV file to include the lan ip of the Gateway."
+echo "Use the lan IP and not the loopback (127.0.0.1)"
+read -p "SMTP Server: " server
+read -p "SMTP Port: " port
+read -p "FROM: " from
+read -p "TO: " to
+
+# create message
+mail_input() {
+  echo "ehlo \$(hostname -f)"
+  echo "mail from: <\$from>"
+  echo "rcpt to: <\$to>"
+  echo "data"
+  echo "Subject: Virtru Gateway Test"
+  echo "Test message through Virtru Gateway"
+  echo "."
+  echo "quit"
+}
+
+mail_input | netcat \$server \$port || err_exit
+
+
+
+
+EOM
+
+
+}
 
 ShowLogo() {
 echo " "
@@ -598,7 +699,7 @@ WriteEnv() {
 
 
 /bin/cat <<EOM >$envFile
-# Enable verbose logging in Gateway. 
+# Enable verbose logging in Gateway.
 # Values
 #   Enable: 1
 #   Disable: 0
@@ -609,24 +710,12 @@ WriteEnv() {
 GATEWAY_VERBOSE_LOGGING=0
 
 
-
-
-
-
-
-
 # Domain name of organization
 # Values
 #   Domain
 # Required: Yes
 #
 GATEWAY_ORGANIZATION_DOMAIN=$gwDomain
-
-
-
-
-
-
 
 
 # Comma delimited list of trusted networks in CIDR formate.
@@ -639,12 +728,6 @@ GATEWAY_ORGANIZATION_DOMAIN=$gwDomain
 $gwInboundRelay
 
 
-
-
-
-
-
-
 # Enable Proxy Protocol for SMTP.
 # For use behind a load balancer.
 # Values
@@ -654,12 +737,6 @@ $gwInboundRelay
 # Required: No
 #
 GATEWAY_PROXY_PROTOCOL=0
-
-
-
-
-
-
 
 
 # Comma delimited set of domains and next-hop destinations and optional ports
@@ -677,12 +754,6 @@ GATEWAY_PROXY_PROTOCOL=0
 $gwOutboundRelay
 
 
-
-
-
-
-
-
 # The mode for the Gateway.
 # Values
 #    decrypt-everything
@@ -694,12 +765,6 @@ $gwOutboundRelay
 GATEWAY_MODE=$gwMode
 
 
-
-
-
-
-
-
 # Topology of the gateway.
 # Values
 #   outbound
@@ -709,23 +774,11 @@ GATEWAY_MODE=$gwMode
 GATEWAY_TOPOLOGY=$gwTopology
 
 
-
-
-
-
-
-
 # URL to Virtru's ACM service.
 # Required: Yes
 # Note: Do not change this.
 #
 GATEWAY_ACM_URL=https://acm.virtru.com
-
-
-
-
-
-
 
 
 # URL to Virtru's Accounts service.
@@ -735,23 +788,11 @@ GATEWAY_ACM_URL=https://acm.virtru.com
 GATEWAY_ACCOUNTS_URL=https://accounts.virtru.com
 
 
-
-
-
-
-
-
 # The base URL for remote content.
 # Required: Yes
 # Note: Do not change this.
 #
 GATEWAY_REMOTE_CONTENT_BASE_URL=https://secure.virtru.com/start
-
-
-
-
-
-
 
 
 # DKIM certificate information
@@ -765,12 +806,6 @@ GATEWAY_REMOTE_CONTENT_BASE_URL=https://secure.virtru.com/start
 # GATEWAY_DKIM_DOMAINS=$gwDkimSelector._domainkey.$gwDomain
 
 
-
-
-
-
-
-
 # HMAC Token Name to connect to Virtru services such as Accounts and ACM.
 # Values
 #   Value provided by Virtru
@@ -778,12 +813,6 @@ GATEWAY_REMOTE_CONTENT_BASE_URL=https://secure.virtru.com/start
 # Note:Contact Virtru Support for getting your token Name.
 #
 GATEWAY_API_TOKEN_NAME=$gwHmacName
-
-
-
-
-
-
 
 
 # HMAC Token Secret to connect to Virtru services such as Accounts and ACM.
@@ -795,12 +824,6 @@ GATEWAY_API_TOKEN_NAME=$gwHmacName
 GATEWAY_API_TOKEN_SECRET=$gwHmacSecret
 
 
-
-
-
-
-
-
 # Amplitude Token to connect to the Virtru Events platform
 # Values
 #   Value provided by Virtru
@@ -808,12 +831,6 @@ GATEWAY_API_TOKEN_SECRET=$gwHmacSecret
 # Note:Contact Virtru Support for getting your Token.
 #
 GATEWAY_AMPLITUDE_API_KEY=$gwAmplitudeToken
-
-
-
-
-
-
 
 
 # Consider a message as undeliverable, when delivery fails with a temporary error, and the time in the queue
@@ -830,11 +847,6 @@ MAX_QUEUE_LIFETIME=5m
 
 
 
-
-
-
-
-
 # The maximal time between attempts to deliver a deferred message.
 # Values
 #   NumberUnits
@@ -843,12 +855,6 @@ MAX_QUEUE_LIFETIME=5m
 # Note: Set to a value greater than or equal to MIN_BACKOFF_TIME
 #
 MAX_BACKOFF_TIME=45s
-
-
-
-
-
-
 
 
 # The minimal time between attempts to deliver a deferred message
@@ -861,12 +867,6 @@ MAX_BACKOFF_TIME=45s
 MIN_BACKOFF_TIME=30s
 
 
-
-
-
-
-
-
 # The time between deferred queue scans by the queue manager
 # Values
 #   NumberUnits
@@ -874,11 +874,6 @@ MIN_BACKOFF_TIME=30s
 # Required: No
 #
 QUEUE_RUN_DELAY=30s
-
-
-
-
-
 
 
 
@@ -893,12 +888,6 @@ QUEUE_RUN_DELAY=30s
 GATEWAY_SMTPD_USE_TLS=1
 
 
-
-
-
-
-
-
 # Gateway Inbound
 # TLS level for inbound connections
 # Values
@@ -908,12 +897,6 @@ GATEWAY_SMTPD_USE_TLS=1
 # Require: No
 #
 GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic
-
-
-
-
-
-
 
 
 # Gateway Outbound
@@ -927,12 +910,6 @@ GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic
 GATEWAY_SMTP_USE_TLS=1
 
 
-
-
-
-
-
-
 # Gateway Outbound
 # TLS level for outbound connections
 # Values
@@ -942,12 +919,6 @@ GATEWAY_SMTP_USE_TLS=1
 # Require: No
 #
 GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
-
-
-
-
-
-
 
 
 # Gateway Outbound
@@ -961,12 +932,6 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 # GATEWAY_SMTP_TLS_POLICY_MAPS=
 
 
-
-
-
-
-
-
 # New Relic Key
 # Customer provided key to log events in customer's New Relic Tenant
 # Values
@@ -974,7 +939,6 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 # Required: No
 #
 # GATEWAY_NEWRELIC_CRED=
-
 
 
 
@@ -1001,8 +965,6 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 #
 
 
-
-
 # Inbound X-Header Authentication
 # Enable inbound X-Header authentication
 # Values
@@ -1015,8 +977,6 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 #
 
 
-
-
 # Inbound X-Header Authentication
 # Enable inbound X-Header authentication Shared Secret
 # Example:
@@ -1026,8 +986,6 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 #
 # GATEWAY_XHEADER_AUTH_SECRET=
 #
-
-
 
 
 # CKS Enabled Organization
@@ -1053,12 +1011,8 @@ $gwCks
 $gwCksKey
 
 
-
-
-
-
 # Enable Downstream SASL Authentication
-# 
+#
 # Enable if the downstream host requires SASL Authentication
 # Values
 #   1 Enable
@@ -1071,22 +1025,16 @@ $gwCksKey
 GATEWAY_SMTP_SASL_ENABLED_DOWNSTREAM=0
 
 
-
-
-
-
-
-
 # Username and Passwords associated with downstream SASL Authentication
-# 
+#
 # Requires GATEWAY_SMTP_SASL_ENABLED_DOWNSTREAM=1
-# Values 
-# Domains and their corresponding users, and passwords. No line breaks. 
-# Each domain credentials is separated by a comma. 
-# Within that domain, the specific details (fqdn, username, password) are separated by “=>”
+# Values:
+#   Domains and their corresponding users, and passwords. No line breaks.
+#   Each domain credentials is separated by a comma.
+#   Within that domain, the specific details (fqdn, username, password) are separated by “=>”
 #
 # Example:
-# smtp.gmail.com=>user@domain.com=>password1,smtp.domain2.net=>user2=>password2
+#   smtp.gmail.com=>user@domain.com=>password1,smtp.domain2.net=>user2=>password2
 #
 # GATEWAY_SMTP_SASL_ACCOUNTS=smtp.gmail.com=>user@domain.com=>password1
 #
