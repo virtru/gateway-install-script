@@ -126,28 +126,28 @@ GetGwName() {
  then
    if [ $gwMode = "encrypt-everything" ]
    then
-     gwName="oe"
+     gwName="oe-$gwPort"
    fi
    if [ $gwMode = "decrypt-everything" ]
    then
-     gwName="od"
+     gwName="od-$gwPort"
    fi
    if [ $gwMode = "dlp" ]
    then
-     gwName="dlp-out"
+     gwName="dlp-out-$gwPort"
    fi
  else
    if [ $gwMode = "encrypt-everything" ]
    then
-     gwName="ie"
+     gwName="ie-$gwPort"
    fi
    if [ $gwMode = "decrypt-everything" ]
    then
-     gwName="id"
+     gwName="id-$gwPort"
    fi
    if [ $gwMode = "dlp" ]
    then
-     gwName="dlp-in"
+     gwName="dlp-in-$gwPort"
    fi
  fi
 
