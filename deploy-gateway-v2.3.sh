@@ -532,8 +532,9 @@ MakeDirectories(){
   mkdir -p /var/virtru/vg/env
   mkdir -p /var/virtru/vg/scripts
   mkdir -p /var/virtru/vg/tls
+  mkdir -p /var/virtru/vg/test
   mkdir -p /var/virtru/vg/queue
-  mkdir -p /var/virtru/vg/queue/$gwName 
+  mkdir -p /var/virtru/vg/queue/$gwName
   mkdir -p $tlsPath
   mkdir -p /var/virtru/vg/dkim
 }
