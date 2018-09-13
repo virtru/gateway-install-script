@@ -101,6 +101,7 @@ MakeTlsCert
 MakeDkimCert
 WriteEnv
 WriteScript
+WriteTestScripts
 clear
 ShowLogo
 ShowNextSteps
@@ -127,28 +128,28 @@ GetGwName() {
  then
    if [ $gwMode = "encrypt-everything" ]
    then
-     gwName="oe"
+     gwName="oe-$gwPort"
    fi
    if [ $gwMode = "decrypt-everything" ]
    then
-     gwName="od"
+     gwName="od-$gwPort"
    fi
    if [ $gwMode = "dlp" ]
    then
-     gwName="dlp-out"
+     gwName="dlp-out-$gwPort"
    fi
  else
    if [ $gwMode = "encrypt-everything" ]
    then
-     gwName="ie"
+     gwName="ie-$gwPort"
    fi
    if [ $gwMode = "decrypt-everything" ]
    then
-     gwName="id"
+     gwName="id-$gwPort"
    fi
    if [ $gwMode = "dlp" ]
    then
-     gwName="dlp-in"
+     gwName="dlp-in-$gwPort"
    fi
  fi
 
@@ -534,6 +535,7 @@ MakeDirectories(){
   mkdir -p /var/virtru/vg/tls
   mkdir -p /var/virtru/vg/queue
   mkdir -p /var/virtru/vg/queue/$gwName 
+  mkdir -p /var/virtru/bg/test
   mkdir -p $tlsPath
   mkdir -p /var/virtru/vg/dkim
 }
@@ -559,7 +561,107 @@ openssl genrsa -out $dkimPrivateFull 1024 -outform PEM
 openssl rsa -in $dkimPrivateFull -out $dkimPublicFull -pubout -outform PEM
 }
 
+WriteTestScripts(){
+    testScript1=/var/virtru/vg/test/checkendpoints.sh
+/bin/cat <<EOM >$testScript1
+#!/bin/bash
 
+echo https://google.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://google.com
+echo ""
+
+echo https://acm.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://acm.virtru.com
+echo ""
+
+echo https://events.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://events.virtru.com
+echo ""
+
+echo https://accounts.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://accounts.virtru.com
+echo ""
+
+echo https://secure.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://secure.virtru.com
+echo ""
+
+echo https://storage.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://storage.virtru.com
+echo ""
+
+echo https://encrypted-storage.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://encrypted-storage.virtru.com
+echo ""
+
+echo https://api.amplitude.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://api.amplitude.com
+echo ""
+
+echo https://cdn.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://cdn.virtru.com
+echo ""
+
+echo https://repo.maven.apache.org
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://repo.maven.apache.org
+echo ""
+
+echo https://hub.docker.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://hub.docker.com
+echo ""
+
+
+
+EOM
+
+
+ testScript2=/var/virtru/vg/test/runall.sh
+/bin/cat <<EOM >$testScript2
+#!/bin/bash
+
+for container in \`docker ps -q\`; do
+  # show the name of the container
+  docker inspect --format='{{.Name}}' \$container;
+  # run the command (date in the case)
+  docker exec -it \$container \$1
+done
+
+
+EOM
+
+
+ testScript3=/var/virtru/vg/test/sendtestmessage.sh
+/bin/cat <<EOM >$testScript3
+#!/bin/bash
+
+echo "Update Virtru Gateway ENV file to include the lan ip of the Gateway."
+echo "Use the lan IP and not the loopback (127.0.0.1)"
+read -p "SMTP Server: " server
+read -p "SMTP Port: " port
+read -p "FROM: " from
+read -p "TO: " to
+
+# create message
+mail_input() {
+  echo "ehlo \$(hostname -f)"
+  echo "mail from: <\$from>"
+  echo "rcpt to: <\$to>"
+  echo "data"
+  echo "Subject: Virtru Gateway Test"
+  echo "Test message through Virtru Gateway"
+  echo "."
+  echo "quit"
+}
+
+mail_input | netcat \$server \$port || err_exit
+
+
+
+
+EOM
+
+
+}
 
 
 ShowLogo() {
