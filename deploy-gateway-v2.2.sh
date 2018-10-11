@@ -641,19 +641,7 @@ read -p "SMTP Port: " port
 read -p "FROM: " from
 read -p "TO: " to
 
-# create message
-mail_input() {
-  echo "ehlo \$(hostname -f)"
-  echo "mail from: <\$from>"
-  echo "rcpt to: <\$to>"
-  echo "data"
-  echo "Subject: Virtru Gateway Test"
-  echo "Test message through Virtru Gateway"
-  echo "."
-  echo "quit"
-}
-
-mail_input | netcat \$server \$port || err_exit
+swaks --To \$to --From \$from --header "Subject: Test mail" --body "This is a test mail" --server \$server --port \$port -tls -4
 
 
 
