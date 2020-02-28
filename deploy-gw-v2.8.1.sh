@@ -1166,7 +1166,7 @@ $gwCksKey
 
 # Enable decryption of PFP protected files
 # The feature to enable/disable the option to decrypt Virtru Persistent File Protection
-# protected files when the Virtru Gateway (DECRYPT mode only)
+# protected files (DECRYPT mode only)
 #
 # Required: No
 # Default: 1
