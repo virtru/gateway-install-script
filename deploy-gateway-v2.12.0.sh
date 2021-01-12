@@ -577,8 +577,8 @@ echo https://acm.virtru.com
 curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://acm.virtru.com
 echo ""
 
-echo https://events.virtru.com
-curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://events.virtru.com
+echo https://api.virtru.com
+curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://acm.virtru.com
 echo ""
 
 echo https://accounts.virtru.com
@@ -589,14 +589,6 @@ echo https://secure.virtru.com
 curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://secure.virtru.com
 echo ""
 
-echo https://storage.virtru.com
-curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://storage.virtru.com
-echo ""
-
-echo https://encrypted-storage.virtru.com
-curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://encrypted-storage.virtru.com
-echo ""
-
 echo https://api.amplitude.com
 curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://api.amplitude.com
 echo ""
@@ -605,15 +597,9 @@ echo https://cdn.virtru.com
 curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://cdn.virtru.com
 echo ""
 
-echo https://repo.maven.apache.org
-curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://repo.maven.apache.org
-echo ""
-
 echo https://hub.docker.com
 curl --connect-timeout 10 -o /dev/null --silent --head --write-out '%{http_code}\n' https://hub.docker.com
 echo ""
-
-
 
 EOM
 
