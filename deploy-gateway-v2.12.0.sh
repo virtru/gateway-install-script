@@ -775,7 +775,7 @@ GATEWAY_TOPOLOGY=$gwTopology
 # Required: Yes
 # Note: Do not change this.
 #
-GATEWAY_ACM_URL=https://acm.virtru.com
+GATEWAY_ACM_URL=https://api.virtru.com/acm
 
 
 
@@ -783,7 +783,7 @@ GATEWAY_ACM_URL=https://acm.virtru.com
 # Required: Yes
 # Note: Do not change this.
 #
-GATEWAY_ACCOUNTS_URL=https://accounts.virtru.com
+GATEWAY_ACCOUNTS_URL=https://api.virtru.com/accounts
 
 
 
