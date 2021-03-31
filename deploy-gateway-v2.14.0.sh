@@ -1165,6 +1165,11 @@ $gwCksKey
 # GATEWAY_DECRYPT_PERSISTENT_PROTECTED_ATTACHMENTS=1
 
 
+# SMTP XHeaders for the Gateway to set on all mail it processes
+# Example Header Values
+# X-Header-1: value1, X-Header-2: value2
+# GATEWAY_ROUTING_XHEADERS= 
+
 EOM
 
 
