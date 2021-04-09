@@ -20,6 +20,7 @@ gwOutboundRelayDefault=""
 gwAmplitudeTokenDefault="0000000000"
 gwHmacNameDefault="0000000000"
 gwHmacSecretDefault="0000000000"
+gwDefaultFips="No"
 
 
 
@@ -42,6 +43,12 @@ gwOutboundRelay=""
 gwAmplitudeToken=""
 gwHmacName=""
 gwHmacSecret=""
+gwType=""
+gwSmtpdTlsCompliance=""
+gwSmtpdSecurityLevel=""
+gwSmtpTlsCompliance=""
+gwSmtpSecurityLevel=""
+
 
 
 
@@ -74,6 +81,7 @@ GetGwVersion $gwVersionDefault
 GetGwPort $gwPortDefault
 GetGwMode $gwModeDefault
 GetGwTopology $gwTopologyDefault
+GetGwFips $gwDefaultFips
 GetGwName
 GetGwInboundRelay $gwInboundRelayDefault
 GetGwCks $gwCksDefault
@@ -259,6 +267,60 @@ GetGwTopology() {
    ;;
    * )
      gwTopology=$1
+   ;;
+ esac
+ echo " "
+}
+
+
+GetGwFips() {
+ local input=""
+ echo "Do you have a FIPS requirement?"
+ echo "  Options"
+ echo "  1 - Yes"
+ echo "  2 - No"
+ echo " "
+ read -p "Enter 1-2 [$1]: " input
+
+
+
+
+ case "$input" in
+   $blank )
+     gwType="gateway"
+     gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic"
+     gwSmtpdTlsCompliance="# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM"
+     gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=opportunistic"
+     gwSmtpTlsCompliance="# GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=MEDIUM"
+
+
+   ;;
+   1 )
+     gwType="gateway-fips"
+     gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=mandatory"
+     gwSmtpdTlsCompliance="GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=HIGH"
+     gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=mandatory"
+     gwSmtpTlsCompliance="GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=HIGH"
+
+
+   ;;
+   2 )
+     gwTopology="gateway"
+     gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic"
+     gwSmtpdTlsCompliance="# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM"
+     gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=opportunistic"
+     gwSmtpTlsCompliance="# GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=MEDIUM"
+
+
+   ;;
+   * )
+     gwTopology="gateway"
+     gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic"
+     gwSmtpdTlsCompliance="# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM"
+     gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=opportunistic"
+     gwSmtpTlsCompliance="# GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=MEDIUM"
+
+
    ;;
  esac
  echo " "
@@ -914,7 +976,7 @@ GATEWAY_SMTPD_USE_TLS=1
 #    GATEWAY_SMTPD_USE_TLS=1
 #
 #
-# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM
+$gwSmtpdTlsCompliance
 
 
 
@@ -928,7 +990,7 @@ GATEWAY_SMTPD_USE_TLS=1
 # Note: Only used when:
 #   GATEWAY_SMTPD_USE_TLS=1
 #
-GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic
+$gwSmtpdSecurityLevel
 
 
 
@@ -952,7 +1014,7 @@ GATEWAY_SMTP_USE_TLS=1
 #   opportunistic
 # Require: No
 #
-GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
+$gwSmtpSecurityLevel
 
 
 
@@ -974,7 +1036,7 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 #    GATEWAY_SMTP_USE_TLS=1
 #
 #
-# GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=MEDIUM
+$gwSmtpTlsCompliance
 
 
 
@@ -1205,7 +1267,7 @@ docker run \\
 --log-driver json-file \\
 --log-opt max-size=10m \\
 --log-opt max-file=100 \\
-virtru/gateway:$gwVersion
+virtru/$gwType:$gwVersion
 EOM
 
 
