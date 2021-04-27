@@ -305,7 +305,7 @@ GetGwFips() {
 
    ;;
    2 )
-     gwTopology="gateway"
+     gwType="gateway"
      gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic"
      gwSmtpdTlsCompliance="# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM"
      gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=opportunistic"
@@ -314,7 +314,7 @@ GetGwFips() {
 
    ;;
    * )
-     gwTopology="gateway"
+     gwType="gateway"
      gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic"
      gwSmtpdTlsCompliance="# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM"
      gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=opportunistic"
