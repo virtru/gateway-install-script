@@ -7,7 +7,7 @@ EntryPoint()
 {
 # Default Variables
 blank=""
-gwVersionDefault="2.17.0"
+gwVersionDefault="latest"
 gwPortDefault="9001"
 gwModeDefault="encrypt-everything"
 gwTopologyDefault="outbound"
@@ -1254,6 +1254,34 @@ GATEWAY_RECORD_POLICY_OPTIONS=0
 #   accept
 #
 GATEWAY_USE_EXISTING_POLICY_OPTIONS=ignore
+
+# Cache Outgoing SMTP Connections
+# Whether to cache outgoing connections to mailservers. 
+# If "1", use on-demand connection caching. If "0", do not cache. 
+# If a list of domains (e.g. example.org,hotmail.com,gmail.com)
+# then use per-destination connection caching.
+#
+# Required: No
+# Default: 0
+# Values:
+#   1 - True
+#   0 - False
+#
+# GATEWAY_SMTP_CACHE_CONNECTIONS=0
+
+# Outgoing SMTP Connection Cache Time Limit
+# How long to cache SMTP connections for. 
+# Sets smtp_connection_cache_time_limit to the provied value
+# so that the smtp daemon doesn't close the connection and 
+# sets connection_cache_ttl_limit to the same value so that the cached value is still valid
+#
+# Required: No
+# Default: None
+# Example Values:
+#   30s
+#   2m
+#
+# GATEWAY_SMTP_CONNECTION_CACHE_TIME_LIMIT=30s
 
 EOM
 
