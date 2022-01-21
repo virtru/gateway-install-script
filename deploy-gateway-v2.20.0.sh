@@ -1232,29 +1232,6 @@ $gwCksKey
 # X-Header-1: value1, X-Header-2: value2
 # GATEWAY_ROUTING_XHEADERS= 
 
-# Record policy security options upon decrypt
-# Only available on outbound decrypt modes
-#
-# Required: Yes
-# Default: 0
-# Values:
-#   1 - True
-#   0 - False
-#
-GATEWAY_RECORD_POLICY_OPTIONS=0
-
-# Use existing policy security options
-# Only available on outbound encrypt mode, will use the additional policy security settings
-# based on the security settings of the original policy before decryption
-#
-# Required: Yes
-# Default: ignore
-# Values:
-#   ignore
-#   accept
-#
-GATEWAY_USE_EXISTING_POLICY_OPTIONS=ignore
-
 # Cache Outgoing SMTP Connections
 # Whether to cache outgoing connections to mailservers. 
 # If "1", use on-demand connection caching. If "0", do not cache. 
