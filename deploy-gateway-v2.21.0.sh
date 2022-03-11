@@ -1325,7 +1325,6 @@ ShowNextSteps() {
   echo " Deploy Successful!"
   echo " Next Steps:"
   echo " "
-  echo " run: docker login"
   echo " run: sh $scriptFile"
   echo "-----------------------"
 }
