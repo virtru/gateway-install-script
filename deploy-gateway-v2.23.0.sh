@@ -718,7 +718,7 @@ echo "     ++++ ++++       ++++    ++++        ++++      ++++        ++++    +++
 echo "     ++++++          ;+++    ++++        ++++      ++++          ++++++++"
 echo "     ++++             +++     ++'         ++        ++'           .++++"
 echo " "
-echo "   S   i   m   p   l   e      E   m   a   i   l      P   r   i   v   a   c   y"
+echo "        R   e   s   p   e   c   t        t   h   e         D  a  t  a"
 echo " "
 echo " "
 
