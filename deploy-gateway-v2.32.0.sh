@@ -791,7 +791,7 @@ GATEWAY_PROXY_PROTOCOL=0
 
 
 
-# Comma delimited set of domains and next-hop destinations and optional ports
+# Define the next-hop destination and port, supports FQDN and IPV4 address
 # Values
 #   Not defined/Commented out - Final delivery by MX
 #   GATEWAY_TRANSPORT_MAPS=*=>[Next hop FQDN]:port
