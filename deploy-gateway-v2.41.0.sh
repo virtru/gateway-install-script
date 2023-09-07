@@ -7,7 +7,7 @@ EntryPoint()
 {
 # Default Variables
 blank=""
-gwVersionDefault="2.19.3"
+gwVersionDefault="2.41.0"
 gwPortDefault="9001"
 gwModeDefault="encrypt-everything"
 gwTopologyDefault="outbound"
@@ -718,7 +718,7 @@ echo "     ++++ ++++       ++++    ++++        ++++      ++++        ++++    +++
 echo "     ++++++          ;+++    ++++        ++++      ++++          ++++++++"
 echo "     ++++             +++     ++'         ++        ++'           .++++"
 echo " "
-echo "   S   i   m   p   l   e      E   m   a   i   l      P   r   i   v   a   c   y"
+echo "        R   e   s   p   e   c   t        t   h   e         D  a  t  a"
 echo " "
 echo " "
 
@@ -791,7 +791,7 @@ GATEWAY_PROXY_PROTOCOL=0
 
 
 
-# Comma delimited set of domains and next-hop destinations and optional ports
+# Define the next-hop destination and port, supports FQDN and IPV4 address
 # Values
 #   Not defined/Commented out - Final delivery by MX
 #   GATEWAY_TRANSPORT_MAPS=*=>[Next hop FQDN]:port
@@ -1087,16 +1087,6 @@ $gwSmtpTlsCompliance
 
 
 
-# New Relic Key
-# Customer provided key to log events in customer's New Relic Tenant
-# Values
-#   Provided by New Relic
-# Required: No
-#
-# GATEWAY_NEWRELIC_CRED=
-
-
-
 # Inbound Authentication enablement.
 # Enable inbound authentication.
 # Supported modes: CRAM-MD5 or DIGEST-MD5
@@ -1155,7 +1145,7 @@ $gwSmtpTlsCompliance
 # Enable inbound X-Header authentication Shared Secret
 # Example variable:
 # GATEWAY_XHEADER_AUTH_SECRET=123456789
-# Example of applied header with secret 
+# Example of applied header with secret
 # X-Header-Virtru-Auth=123456789
 # Require: No
 #
@@ -1220,7 +1210,7 @@ $gwCksKey
 #
 # Required: No
 # Default: 1
-# Values: 
+# Values:
 #    1 - Enabled
 #    0 - Disabled
 #
@@ -1230,34 +1220,11 @@ $gwCksKey
 # SMTP XHeaders for the Gateway to set on all mail it processes
 # Example Header Values
 # X-Header-1: value1, X-Header-2: value2
-# GATEWAY_ROUTING_XHEADERS= 
-
-# Record policy security options upon decrypt
-# Only available on outbound decrypt modes
-#
-# Required: Yes
-# Default: 0
-# Values:
-#   1 - True
-#   0 - False
-#
-GATEWAY_RECORD_POLICY_OPTIONS=0
-
-# Use existing policy security options
-# Only available on outbound encrypt mode, will use the additional policy security settings
-# based on the security settings of the original policy before decryption
-#
-# Required: Yes
-# Default: ignore
-# Values:
-#   ignore
-#   accept
-#
-GATEWAY_USE_EXISTING_POLICY_OPTIONS=ignore
+# GATEWAY_ROUTING_XHEADERS=
 
 # Cache Outgoing SMTP Connections
-# Whether to cache outgoing connections to mailservers. 
-# If "1", use on-demand connection caching. If "0", do not cache. 
+# Whether to cache outgoing connections to mailservers.
+# If "1", use on-demand connection caching. If "0", do not cache.
 # If a list of domains (e.g. example.org,hotmail.com,gmail.com)
 # then use per-destination connection caching.
 #
@@ -1266,12 +1233,13 @@ GATEWAY_USE_EXISTING_POLICY_OPTIONS=ignore
 # Values:
 #   1 - True
 #   0 - False
-
+#
 # GATEWAY_SMTP_CACHE_CONNECTIONS=0
+
 # Outgoing SMTP Connection Cache Time Limit
-# How long to cache SMTP connections for. 
+# How long to cache SMTP connections for.
 # Sets smtp_connection_cache_time_limit to the provied value
-# so that the smtp daemon doesn't close the connection and 
+# so that the smtp daemon doesn't close the connection and
 # sets connection_cache_ttl_limit to the same value so that the cached value is still valid
 #
 # Required: No
@@ -1281,6 +1249,19 @@ GATEWAY_USE_EXISTING_POLICY_OPTIONS=ignore
 #   2m
 #
 # GATEWAY_SMTP_CONNECTION_CACHE_TIME_LIMIT=30s
+
+# Decrypt Then Re-Encrypt Workflow
+# If you use a multi-gateway approach for sending email.
+# I.e. your workflow looks something like
+# (Decrypt -> Scan -> Encrypt) before sending/receiving email.
+#
+# Required: No
+# Default: Disabled
+# Values:
+#   1 - Enabled
+#   0 - Disabled
+#
+# GATEWAY_DECRYPT_THEN_ENCRYPT=0
 
 
 EOM
@@ -1344,7 +1325,6 @@ ShowNextSteps() {
   echo " Deploy Successful!"
   echo " Next Steps:"
   echo " "
-  echo " run: docker login"
   echo " run: sh $scriptFile"
   echo "-----------------------"
 }

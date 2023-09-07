@@ -7,7 +7,7 @@ EntryPoint()
 {
 # Default Variables
 blank=""
-gwVersionDefault="2.12.0"
+gwVersionDefault="2.40.0"
 gwPortDefault="9001"
 gwModeDefault="encrypt-everything"
 gwTopologyDefault="outbound"
@@ -20,6 +20,7 @@ gwOutboundRelayDefault=""
 gwAmplitudeTokenDefault="0000000000"
 gwHmacNameDefault="0000000000"
 gwHmacSecretDefault="0000000000"
+gwDefaultFips="2"
 
 
 
@@ -42,6 +43,12 @@ gwOutboundRelay=""
 gwAmplitudeToken=""
 gwHmacName=""
 gwHmacSecret=""
+gwType=""
+gwSmtpdTlsCompliance=""
+gwSmtpdSecurityLevel=""
+gwSmtpTlsCompliance=""
+gwSmtpSecurityLevel=""
+
 
 
 
@@ -74,6 +81,7 @@ GetGwVersion $gwVersionDefault
 GetGwPort $gwPortDefault
 GetGwMode $gwModeDefault
 GetGwTopology $gwTopologyDefault
+GetGwFips $gwDefaultFips
 GetGwName
 GetGwInboundRelay $gwInboundRelayDefault
 GetGwCks $gwCksDefault
@@ -259,6 +267,60 @@ GetGwTopology() {
    ;;
    * )
      gwTopology=$1
+   ;;
+ esac
+ echo " "
+}
+
+
+GetGwFips() {
+ local input=""
+ echo "Do you have a FIPS requirement?"
+ echo "  Options"
+ echo "  1 - Yes"
+ echo "  2 - No"
+ echo " "
+ read -p "Enter 1-2 [$1]: " input
+
+
+
+
+ case "$input" in
+   $blank )
+     gwType="gateway"
+     gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic"
+     gwSmtpdTlsCompliance="# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM"
+     gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=opportunistic"
+     gwSmtpTlsCompliance="# GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=MEDIUM"
+
+
+   ;;
+   1 )
+     gwType="gateway-fips"
+     gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=mandatory"
+     gwSmtpdTlsCompliance="GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=HIGH"
+     gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=mandatory"
+     gwSmtpTlsCompliance="GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=HIGH"
+
+
+   ;;
+   2 )
+     gwType="gateway"
+     gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic"
+     gwSmtpdTlsCompliance="# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM"
+     gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=opportunistic"
+     gwSmtpTlsCompliance="# GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=MEDIUM"
+
+
+   ;;
+   * )
+     gwType="gateway"
+     gwSmtpdSecurityLevel="GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic"
+     gwSmtpdTlsCompliance="# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM"
+     gwSmtpSecurityLevel="GATEWAY_SMTP_SECURITY_LEVEL=opportunistic"
+     gwSmtpTlsCompliance="# GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=MEDIUM"
+
+
    ;;
  esac
  echo " "
@@ -541,6 +603,7 @@ MakeDirectories(){
   mkdir -p /var/virtru/vg/tls
   mkdir -p /var/virtru/vg/queue
   mkdir -p /var/virtru/vg/queue/$gwName
+  chown -R 149:149 /var/virtru/vg/queue/$gwName
   mkdir -p /var/virtru/vg/test
   mkdir -p $tlsPath
   mkdir -p /var/virtru/vg/dkim
@@ -655,7 +718,7 @@ echo "     ++++ ++++       ++++    ++++        ++++      ++++        ++++    +++
 echo "     ++++++          ;+++    ++++        ++++      ++++          ++++++++"
 echo "     ++++             +++     ++'         ++        ++'           .++++"
 echo " "
-echo "   S   i   m   p   l   e      E   m   a   i   l      P   r   i   v   a   c   y"
+echo "        R   e   s   p   e   c   t        t   h   e         D  a  t  a"
 echo " "
 echo " "
 
@@ -728,7 +791,7 @@ GATEWAY_PROXY_PROTOCOL=0
 
 
 
-# Comma delimited set of domains and next-hop destinations and optional ports
+# Define the next-hop destination and port, supports FQDN and IPV4 address
 # Values
 #   Not defined/Commented out - Final delivery by MX
 #   GATEWAY_TRANSPORT_MAPS=*=>[Next hop FQDN]:port
@@ -913,7 +976,7 @@ GATEWAY_SMTPD_USE_TLS=1
 #    GATEWAY_SMTPD_USE_TLS=1
 #
 #
-# GATEWAY_SMTPD_TLS_COMPLIANCE_UPSTREAM=MEDIUM
+$gwSmtpdTlsCompliance
 
 
 
@@ -927,7 +990,7 @@ GATEWAY_SMTPD_USE_TLS=1
 # Note: Only used when:
 #   GATEWAY_SMTPD_USE_TLS=1
 #
-GATEWAY_SMTPD_SECURITY_LEVEL=opportunistic
+$gwSmtpdSecurityLevel
 
 
 
@@ -951,7 +1014,7 @@ GATEWAY_SMTP_USE_TLS=1
 #   opportunistic
 # Require: No
 #
-GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
+$gwSmtpSecurityLevel
 
 
 
@@ -973,7 +1036,7 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 #    GATEWAY_SMTP_USE_TLS=1
 #
 #
-# GATEWAY_SMTP_TLS_COMPLIANCE_DOWNSTREAM=MEDIUM
+$gwSmtpTlsCompliance
 
 
 
@@ -1021,16 +1084,6 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 # GATEWAY_SMTP_TLS_POLICY_MAPS=example.com=>none,example.net=>maybe
 #
 # GATEWAY_SMTP_TLS_POLICY_MAPS=
-
-
-
-# New Relic Key
-# Customer provided key to log events in customer's New Relic Tenant
-# Values
-#   Provided by New Relic
-# Required: No
-#
-# GATEWAY_NEWRELIC_CRED=
 
 
 
@@ -1092,7 +1145,7 @@ GATEWAY_SMTP_SECURITY_LEVEL=opportunistic
 # Enable inbound X-Header authentication Shared Secret
 # Example variable:
 # GATEWAY_XHEADER_AUTH_SECRET=123456789
-# Example of applied header with secret 
+# Example of applied header with secret
 # X-Header-Virtru-Auth=123456789
 # Require: No
 #
@@ -1157,11 +1210,58 @@ $gwCksKey
 #
 # Required: No
 # Default: 1
-# Values: 
+# Values:
 #    1 - Enabled
 #    0 - Disabled
 #
 # GATEWAY_DECRYPT_PERSISTENT_PROTECTED_ATTACHMENTS=1
+
+
+# SMTP XHeaders for the Gateway to set on all mail it processes
+# Example Header Values
+# X-Header-1: value1, X-Header-2: value2
+# GATEWAY_ROUTING_XHEADERS=
+
+# Cache Outgoing SMTP Connections
+# Whether to cache outgoing connections to mailservers.
+# If "1", use on-demand connection caching. If "0", do not cache.
+# If a list of domains (e.g. example.org,hotmail.com,gmail.com)
+# then use per-destination connection caching.
+#
+# Required: No
+# Default: 0
+# Values:
+#   1 - True
+#   0 - False
+#
+# GATEWAY_SMTP_CACHE_CONNECTIONS=0
+
+# Outgoing SMTP Connection Cache Time Limit
+# How long to cache SMTP connections for.
+# Sets smtp_connection_cache_time_limit to the provied value
+# so that the smtp daemon doesn't close the connection and
+# sets connection_cache_ttl_limit to the same value so that the cached value is still valid
+#
+# Required: No
+# Default: None
+# Example Values:
+#   30s
+#   2m
+#
+# GATEWAY_SMTP_CONNECTION_CACHE_TIME_LIMIT=30s
+
+# Decrypt Then Re-Encrypt Workflow
+# If you use a multi-gateway approach for sending email.
+# I.e. your workflow looks something like
+# (Decrypt -> Scan -> Encrypt) before sending/receiving email.
+#
+# Required: No
+# Default: Disabled
+# Values:
+#   1 - Enabled
+#   0 - Disabled
+#
+# GATEWAY_DECRYPT_THEN_ENCRYPT=0
 
 
 EOM
@@ -1199,7 +1299,7 @@ docker run \\
 --log-driver json-file \\
 --log-opt max-size=10m \\
 --log-opt max-file=100 \\
-virtru/gateway:$gwVersion
+virtru/$gwType:$gwVersion
 EOM
 
 
@@ -1225,7 +1325,6 @@ ShowNextSteps() {
   echo " Deploy Successful!"
   echo " Next Steps:"
   echo " "
-  echo " run: docker login"
   echo " run: sh $scriptFile"
   echo "-----------------------"
 }
