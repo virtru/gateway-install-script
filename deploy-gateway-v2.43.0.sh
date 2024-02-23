@@ -7,7 +7,7 @@ EntryPoint()
 {
 # Default Variables
 blank=""
-gwVersionDefault="2.41.0"
+gwVersionDefault="2.43.0"
 gwPortDefault="9001"
 gwModeDefault="encrypt-everything"
 gwTopologyDefault="outbound"
