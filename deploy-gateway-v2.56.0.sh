@@ -7,7 +7,7 @@ EntryPoint()
 {
 # Default Variables
 blank=""
-gwVersionDefault="2.41.0"
+gwVersionDefault="v2.56.0"
 gwPortDefault="9001"
 gwModeDefault="encrypt-everything"
 gwTopologyDefault="outbound"
@@ -1299,7 +1299,7 @@ docker run \\
 --log-driver json-file \\
 --log-opt max-size=10m \\
 --log-opt max-file=100 \\
-virtru/$gwType:$gwVersion
+containers.virtru.com/$gwType:$gwVersion
 EOM
 
 
