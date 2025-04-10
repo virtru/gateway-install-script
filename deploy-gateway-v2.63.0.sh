@@ -7,7 +7,7 @@ EntryPoint()
 {
 # Default Variables
 blank=""
-gwVersionDefault="2.41.0"
+gwVersionDefault="v2.63.0"
 gwPortDefault="9001"
 gwModeDefault="encrypt-everything"
 gwTopologyDefault="outbound"
@@ -816,7 +816,7 @@ $gwOutboundRelay
 # Values
 #    decrypt-everything
 #    encrypt-everything
-#    dlp - Use rules defined on Virtru Dashboard (https://secure.virtru.com/dashboard)
+#    dlp - Use security rules defined on Virtru Dashboard (https://secure.virtru.com/dashboard)
 # Default: encrypt-everything
 # Required: Yes
 #
@@ -1299,7 +1299,7 @@ docker run \\
 --log-driver json-file \\
 --log-opt max-size=10m \\
 --log-opt max-file=100 \\
-virtru/$gwType:$gwVersion
+containers.virtru.com/$gwType:$gwVersion
 EOM
 
 
